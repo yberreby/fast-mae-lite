@@ -2,8 +2,6 @@ from PIL import Image
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-from typing import Dict, Tuple, Any
-import matplotlib.pyplot as plt
 
 
 def load_pretrained_weights(
