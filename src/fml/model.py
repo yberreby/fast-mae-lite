@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from functools import partial
-from typing import Optional, Tuple, Union, Callable
+from typing import Optional, Tuple, Callable
 
 import torch
 import torch.nn as nn
-import numpy as np
 from timm.models.vision_transformer import PatchEmbed
 
-from timm.models.vision_transformer import DropPath, Mlp, Attention as BaseAttn
+from timm.models.vision_transformer import DropPath, Mlp
 from .utils import *
 
 

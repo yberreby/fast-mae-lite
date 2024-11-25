@@ -3,11 +3,13 @@ import matplotlib.pyplot as plt
 from fml.model import *
 from fml.utils import *
 
+
 @pytest.fixture
 def model():
     config = MAEConfig()  # Uses default tiny configuration
-    model = MAELite(config).to('cuda')
+    model = MAELite(config).to("cuda")
     return model
+
 
 @pytest.fixture
 def pretrained_model(model):
@@ -15,9 +17,11 @@ def pretrained_model(model):
     load_pretrained_weights(model, "ckpt/mae_tiny_400e.pth.tar")
     return model
 
+
 @pytest.fixture
 def sample_image():
     return prepare_sample_input("test.png")
+
 
 def test_model_forward_pas(pretrained_model, sample_image):
     pretrained_model.eval()
@@ -26,6 +30,7 @@ def test_model_forward_pas(pretrained_model, sample_image):
     assert loss is not None
     assert pred is not None
     assert mask is not None
+
 
 def test_visual_reconstruction(pretrained_model, sample_image):
     def reconstruct_image(model, image, use_amp=False):
@@ -51,6 +56,6 @@ def test_visual_reconstruction(pretrained_model, sample_image):
     plt.subplot(1, 3, 3)
     plt.imshow(reconstructed_amp.permute(1, 2, 0))
     plt.title("Reconstructed AMP")
-    plt.savefig('test_visual_reconstruction.png')
+    plt.savefig("test_visual_reconstruction.png")
     plt.show()
     plt.close()

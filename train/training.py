@@ -32,7 +32,7 @@ class MAETrainer:
         device: torch.device,
         scheduler: Optional[torch.optim.lr_scheduler._LRScheduler] = None,
         logger: Optional[logging.Logger] = None,
-        profiler = None,
+        profiler=None,
         max_vis_images: Optional[int] = 4,
     ):
         self.model = model
@@ -83,16 +83,22 @@ class MAETrainer:
         images = images.to(self.device, non_blocking=True)
 
         with torch.amp.autocast("cuda", enabled=self.cfg.amp):
-            loss, pred, mask, latent = self.model(images, mask_ratio=self.cfg.mask_ratio)
+            loss, pred, mask, latent = self.model(
+                images, mask_ratio=self.cfg.mask_ratio
+            )
             reconstructed = self.model.unpatchify(pred)
 
-        return StepOutput(loss=loss.item(), reconstructed=reconstructed, mask=mask, latent=latent)
+        return StepOutput(
+            loss=loss.item(), reconstructed=reconstructed, mask=mask, latent=latent
+        )
 
     def training_step(self, images: torch.Tensor) -> StepOutput:
         images = images.to(self.device, non_blocking=True)
 
         with torch.amp.autocast("cuda", enabled=self.cfg.amp):
-            loss, pred, mask, latent = self.model(images, mask_ratio=self.cfg.mask_ratio)
+            loss, pred, mask, latent = self.model(
+                images, mask_ratio=self.cfg.mask_ratio
+            )
             reconstructed = self.model.unpatchify(pred)
 
         self.scaler.scale(loss).backward()
@@ -104,24 +110,31 @@ class MAETrainer:
         self.scaler.step(self.optimizer)
         self.scaler.update()
         self.optimizer.zero_grad(set_to_none=True)
-        if self.profiler: self.profiler.step()
+        if self.profiler:
+            self.profiler.step()
 
-        return StepOutput(loss=loss.item(), reconstructed=reconstructed, mask=mask, latent=latent)
+        return StepOutput(
+            loss=loss.item(), reconstructed=reconstructed, mask=mask, latent=latent
+        )
 
-    def log_visuals(self, prefix: str, originals: torch.Tensor, out: StepOutput) -> None:
+    def log_visuals(
+        self, prefix: str, originals: torch.Tensor, out: StepOutput
+    ) -> None:
         # print("Logging visuals...", end='', flush=True)
         if self.max_vis_images:
-            originals = originals[:self.max_vis_images]
-            reconstructed = out.reconstructed[:self.max_vis_images]
-            mask = out.mask[:self.max_vis_images]
+            originals = originals[: self.max_vis_images]
+            reconstructed = out.reconstructed[: self.max_vis_images]
+            mask = out.mask[: self.max_vis_images]
         else:
             reconstructed = out.reconstructed
             mask = out.mask
 
         self.writer.add_images(f"{prefix}/original", denorm(originals), self.imgs_seen)
-        self.writer.add_images(f"{prefix}/reconstructed",
-                             torch.clamp(denorm(reconstructed), 0, 1),
-                             self.imgs_seen)
+        self.writer.add_images(
+            f"{prefix}/reconstructed",
+            torch.clamp(denorm(reconstructed), 0, 1),
+            self.imgs_seen,
+        )
 
         # Reshape mask from (B, N) patch space to (B, 1, H, W) image space
         B, N = mask.shape
@@ -130,7 +143,9 @@ class MAETrainer:
         mask_vis = torch.nn.functional.interpolate(
             mask_vis.float(), scale_factor=self.cfg.patch_size, mode="nearest"
         )
-        self.writer.add_images(f"{prefix}/mask", mask_vis, self.imgs_seen, dataformats="NCHW")
+        self.writer.add_images(
+            f"{prefix}/mask", mask_vis, self.imgs_seen, dataformats="NCHW"
+        )
         # print(" done")
 
     def log_metrics(self, out: StepOutput, prefix: str = "train") -> None:
@@ -152,7 +167,9 @@ class MAETrainer:
         total_samples = 0
         vis_images = next(iter(self.val_loader))[0]
 
-        for batch_idx, (images, _) in enumerate(tqdm(self.val_loader, desc="Validating", leave=False)):
+        for batch_idx, (images, _) in enumerate(
+            tqdm(self.val_loader, desc="Validating", leave=False)
+        ):
             out = self.validation_step(images)
 
             if batch_idx == 0:
@@ -182,19 +199,22 @@ class MAETrainer:
                 batch_size = images.shape[0]
                 out = self.training_step(images)
                 self.log_metrics(out)
-                if self.scheduler: self.scheduler.step()
+                if self.scheduler:
+                    self.scheduler.step()
 
                 # Update counters and progress
                 self.imgs_seen += batch_size
                 self.samples_since_val += batch_size
                 self.samples_since_viz += batch_size
                 pbar.update(batch_size)
-                pbar.set_postfix({
-                    "epoch": self.epoch,
-                    "step": f"{self.step_idx}",
-                    "loss": f"{out.loss:.4f}",
-                    "lr": f"{self.optimizer.param_groups[0]['lr']:.2e}",
-                })
+                pbar.set_postfix(
+                    {
+                        "epoch": self.epoch,
+                        "step": f"{self.step_idx}",
+                        "loss": f"{out.loss:.4f}",
+                        "lr": f"{self.optimizer.param_groups[0]['lr']:.2e}",
+                    }
+                )
 
                 # Periodic logging
                 if self.samples_since_viz >= self.cfg.samples_per_viz:
@@ -223,10 +243,14 @@ class MAETrainer:
                 if self.imgs_seen >= self.cfg.total_samples:
                     break
 
-            self.writer.add_scalar("train/epoch_time", time.perf_counter() - t_epoch, self.epoch)
+            self.writer.add_scalar(
+                "train/epoch_time", time.perf_counter() - t_epoch, self.epoch
+            )
 
         pbar.close()
         t_total = time.perf_counter() - t_start
         self.logger.info(f"Training completed in {t_total:.2f}s")
         self.logger.info(f"Best validation loss: {self.best_val_loss:.4f}")
-        self.logger.info(f"Peak memory: {torch.cuda.max_memory_allocated() / 1e9:.2f}GB")
+        self.logger.info(
+            f"Peak memory: {torch.cuda.max_memory_allocated() / 1e9:.2f}GB"
+        )

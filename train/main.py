@@ -35,13 +35,15 @@ class TrainingResources:
 
 
 def setup_paths(cfg: BaseTrainConfig) -> None:
-    for path_attr in ['log_dir', 'ckpt_dir']:
-        path = to_absolute_path(getattr(cfg, path_attr.split('.')[-1]))
+    for path_attr in ["log_dir", "ckpt_dir"]:
+        path = to_absolute_path(getattr(cfg, path_attr.split(".")[-1]))
         Path(path).mkdir(parents=True, exist_ok=True)
-        setattr(cfg, path_attr.split('.')[-1], path)
+        setattr(cfg, path_attr.split(".")[-1], path)
 
 
-def create_model(cfg: BaseTrainConfig, device: torch.device, logger: logging.Logger) -> torch.nn.Module:
+def create_model(
+    cfg: BaseTrainConfig, device: torch.device, logger: logging.Logger
+) -> torch.nn.Module:
     t0 = time.perf_counter()
 
     model_cfg = MAEConfig(
@@ -86,7 +88,9 @@ def initialize_training(
 
     t0 = time.perf_counter()
     train_loader, val_loader = get_dataloaders(cfg)
-    logger.info(f"Dataset sizes - Train: {len(train_loader.dataset)}, Val: {len(val_loader.dataset)}")
+    logger.info(
+        f"Dataset sizes - Train: {len(train_loader.dataset)}, Val: {len(val_loader.dataset)}"
+    )
     logger.info(f"Dataloader setup: {time.perf_counter() - t0:.2f}s")
 
     writer = SummaryWriter(cfg.log_dir)
