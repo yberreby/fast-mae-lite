@@ -7,7 +7,7 @@ import torch.nn as nn
 from timm.models.vision_transformer import PatchEmbed
 
 from timm.models.vision_transformer import DropPath, Mlp
-from .utils import *
+from .utils import get_2d_sincos_pos_embed
 
 
 @dataclass
