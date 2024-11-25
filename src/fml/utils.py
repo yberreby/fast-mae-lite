@@ -6,34 +6,38 @@ from typing import Dict, Tuple, Any
 import matplotlib.pyplot as plt
 
 
-def load_pretrained_weights(model: torch.nn.Module, checkpoint_path: str, device = 'cuda') -> None:
+def load_pretrained_weights(
+    model: torch.nn.Module, checkpoint_path: str, device="cuda"
+) -> None:
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
-    state_dict = checkpoint.get('model', checkpoint)
-    state_dict = {k.replace('module.model.', ''): v for k, v in state_dict.items()}
+    state_dict = checkpoint.get("model", checkpoint)
+    state_dict = {k.replace("module.model.", ""): v for k, v in state_dict.items()}
     model.load_state_dict(state_dict)
+
 
 fixed_mean = [0.485, 0.456, 0.406]
 fixed_std = [0.229, 0.224, 0.225]
 
-def prepare_sample_input(image_path: str, device: str = 'cuda') -> torch.Tensor:
-    transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=fixed_mean,
-                           std=fixed_std)
-    ])
 
-    image = Image.open(image_path).convert('RGB')
+def prepare_sample_input(image_path: str, device: str = "cuda") -> torch.Tensor:
+    transform = transforms.Compose(
+        [
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=fixed_mean, std=fixed_std),
+        ]
+    )
+
+    image = Image.open(image_path).convert("RGB")
     image = transform(image).unsqueeze(0).to(device)
     return image
 
 
-def denorm(tensor: torch.Tensor, mean = fixed_mean, std = fixed_std) -> torch.Tensor:
+def denorm(tensor: torch.Tensor, mean=fixed_mean, std=fixed_std) -> torch.Tensor:
     mean = torch.tensor(mean).to(tensor.device).view(3, 1, 1)
     std = torch.tensor(std).to(tensor.device).view(3, 1, 1)
     return tensor * std + mean
-
 
 
 def get_2d_sincos_pos_embed(embed_dim, grid_size, cls_token=False):
@@ -53,6 +57,7 @@ def get_2d_sincos_pos_embed(embed_dim, grid_size, cls_token=False):
         pos_embed = np.concatenate([np.zeros([1, embed_dim]), pos_embed], axis=0)
     return pos_embed
 
+
 def get_2d_sincos_pos_embed_from_grid(embed_dim, grid):
     assert embed_dim % 2 == 0
     # use half of dimensions to encode grid_h
@@ -60,6 +65,7 @@ def get_2d_sincos_pos_embed_from_grid(embed_dim, grid):
     emb_w = get_1d_sincos_pos_embed_from_grid(embed_dim // 2, grid[1])  # (H*W, D/2)
     emb = np.concatenate([emb_h, emb_w], axis=1)  # (H*W, D)
     return emb
+
 
 def get_1d_sincos_pos_embed_from_grid(embed_dim, pos):
     """
@@ -73,7 +79,7 @@ def get_1d_sincos_pos_embed_from_grid(embed_dim, pos):
     omega = 1.0 / 10000**omega  # (D/2,)
 
     pos = pos.reshape(-1)  # (M,)
-    out = np.einsum('m,d->md', pos, omega)  # (M, D/2), outer product
+    out = np.einsum("m,d->md", pos, omega)  # (M, D/2), outer product
 
     emb_sin = np.sin(out)  # (M, D/2)
     emb_cos = np.cos(out)  # (M, D/2)
