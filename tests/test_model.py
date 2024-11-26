@@ -1,7 +1,8 @@
 import pytest
 import matplotlib.pyplot as plt
-from fml.model import *
-from fml.utils import *
+from fml.model import MAELite, MAEConfig
+from fml.utils import prepare_sample_input, denorm
+import torch
 
 
 @pytest.fixture
@@ -13,9 +14,8 @@ def model():
 
 @pytest.fixture
 def pretrained_model(model):
-    # todo: autodownload ckpt from gdrive if missing
-    load_pretrained_weights(model, "ckpt/mae_tiny_400e.pth.tar")
-    return model
+    # Old: load_pretrained_weights(model, "ckpt/mae_tiny_400e.pth.tar")
+    return MAELite.load_legacy_weights("ckpt/mae_tiny_400e.pth.tar")
 
 
 @pytest.fixture
