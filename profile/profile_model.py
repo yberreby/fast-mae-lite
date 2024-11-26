@@ -30,14 +30,15 @@ def profile_mae(batch_size=32):
         for _ in range(5):
             optimizer.zero_grad()
 
-            with record_function("forward"):
-                loss, pred, mask, _ = model(batch)
+            with torch.cuda.amp.autocast():
+                with record_function("forward"):
+                    loss, pred, mask, _ = model(batch)
 
-            with record_function("backward"):
-                loss.backward()
+                with record_function("backward"):
+                    loss.backward()
 
-            with record_function("optimizer"):
-                optimizer.step()
+                with record_function("optimizer"):
+                    optimizer.step()
 
             prof.step()
 

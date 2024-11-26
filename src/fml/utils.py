@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 
 
 def load_pretrained_weights(
-    model: torch.nn.Module, checkpoint_path: str, device="cuda"
+    model: torch.nn.Module, checkpoint_path: str, device: torch.device = "cuda"
 ) -> None:
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
     state_dict = checkpoint.get("model", checkpoint)

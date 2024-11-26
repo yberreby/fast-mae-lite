@@ -33,30 +33,29 @@ def test_model_forward_pas(pretrained_model, sample_image):
 
 
 def test_visual_reconstruction(pretrained_model, sample_image):
+    def reconstruct_image(model, image, use_amp=False):
+        torch.manual_seed(0)
+        with torch.cuda.amp.autocast(enabled=use_amp):
+            with torch.no_grad():
+                _, pred, _, _ = model(image, mask_ratio=0.75)
+            reconstructed = model.unpatchify(pred).cpu().squeeze(0)
+            return denorm(torch.clamp(reconstructed, 0, 1))
+
     pretrained_model.eval()
-    with torch.no_grad():
-        loss, pred, mask, _ = pretrained_model(sample_image, mask_ratio=0.75)
-
-    # Unpatchify the predicted patches to reconstruct the image
-    reconstructed = pretrained_model.unpatchify(pred)
-    reconstructed = reconstructed.cpu().squeeze(0)
-    reconstructed = torch.clamp(reconstructed, 0, 1)
-
-    # Denormalize the images
     sample_image_denorm = denorm(sample_image.cpu().squeeze(0))
+    reconstructed_fp32 = reconstruct_image(pretrained_model, sample_image)
+    reconstructed_amp = reconstruct_image(pretrained_model, sample_image, use_amp=True)
 
-    # Outputs are normalized with local statistics. Denormalization using ImageNet
-    # doesn't make as much sense.
-    # UNMASKED patches will not get correctly reconstructed, that is fine. You can put them back manually or finetune.
-    reconstructed = denorm(reconstructed)
-
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
+    plt.figure(figsize=(15, 5))
+    plt.subplot(1, 3, 1)
     plt.imshow(sample_image_denorm.permute(1, 2, 0))
     plt.title("Original")
-    plt.subplot(1, 2, 2)
-    plt.imshow(reconstructed.permute(1, 2, 0))
-    plt.title("Reconstructed")
+    plt.subplot(1, 3, 2)
+    plt.imshow(reconstructed_fp32.permute(1, 2, 0))
+    plt.title("Reconstructed FP32")
+    plt.subplot(1, 3, 3)
+    plt.imshow(reconstructed_amp.permute(1, 2, 0))
+    plt.title("Reconstructed AMP")
     plt.savefig("test_visual_reconstruction.png")
     plt.show()
     plt.close()

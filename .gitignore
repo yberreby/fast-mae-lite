@@ -10,3 +10,9 @@ wheels/
 .venv
 *.png
 ckpt
+*.json
+
+runs
+outputs
+checkpoints
+multirun

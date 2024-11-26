@@ -7,7 +7,7 @@ import torch.nn as nn
 from timm.models.vision_transformer import PatchEmbed
 
 from timm.models.vision_transformer import DropPath, Mlp
-from .utils import *
+from .utils import get_2d_sincos_pos_embed
 
 
 @dataclass
@@ -22,7 +22,8 @@ class MAEConfig:
     decoder_depth: int = 1
     decoder_num_heads: int = 3
     mlp_ratio: float = 4.0
-    norm_pix_loss: bool = True
+    norm_pix_loss: bool = True  # True in original MAE-Lite paper
+    masked_loss: bool = True  # True in original MAE-Lite paper
     mask_ratio: float = 0.75  # Default masking ratio
     norm_layer: Callable = partial(nn.LayerNorm, eps=1e-6)
 
@@ -171,13 +172,17 @@ class MAELite(nn.Module):
         self.initialize_weights()
 
     def initialize_weights(self):
-        # Initialize (and freeze) position embeddings by sin-cos embedding
+        device = self.pos_embed.device
+
+        # Initialize position embeddings
         pos_embed = get_2d_sincos_pos_embed(
             self.pos_embed.shape[-1],
             int(self.patch_embed.num_patches**0.5),
             cls_token=True,
         )
-        self.pos_embed.data.copy_(torch.from_numpy(pos_embed).float().unsqueeze(0))
+        self.pos_embed.data.copy_(
+            torch.from_numpy(pos_embed).float().to(device).unsqueeze(0)
+        )
 
         decoder_pos_embed = get_2d_sincos_pos_embed(
             self.decoder_pos_embed.shape[-1],
@@ -185,14 +190,12 @@ class MAELite(nn.Module):
             cls_token=True,
         )
         self.decoder_pos_embed.data.copy_(
-            torch.from_numpy(decoder_pos_embed).float().unsqueeze(0)
+            torch.from_numpy(decoder_pos_embed).float().to(device).unsqueeze(0)
         )
 
-        # Initialize patch_embed like nn.Linear (instead of nn.Conv2d)
+        # Rest remains the same
         w = self.patch_embed.proj.weight.data
         torch.nn.init.xavier_uniform_(w.view([w.shape[0], -1]))
-
-        # Initialize other parameters
         torch.nn.init.normal_(self.cls_token, std=0.02)
         torch.nn.init.normal_(self.mask_token, std=0.02)
         self.apply(self._init_weights)
@@ -313,7 +316,12 @@ class MAELite(nn.Module):
         loss = (pred - target) ** 2
         loss = loss.mean(dim=-1)  # mean loss per patch
 
-        loss = (loss * mask).sum() / mask.sum()  # mean loss on removed patches
+        # If this is True, the model will not try to predict
+        # patches that were given as input (which is a trivial operation)
+        if self.config.masked_loss:
+            loss = loss * mask
+
+        loss = loss.sum() / mask.sum()  # mean loss on removed patches
         return loss
 
     def forward(
