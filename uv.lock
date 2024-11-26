@@ -208,12 +208,10 @@ dependencies = [
     { name = "editables" },
     { name = "hatchling" },
     { name = "hydra-core" },
-    { name = "ipython" },
     { name = "jaxtyping" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pillow-simd" },
-    { name = "pytest" },
     { name = "setuptools" },
     { name = "tensorboard" },
     { name = "timm" },
@@ -221,22 +219,34 @@ dependencies = [
     { name = "triton" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "hatchling" },
+    { name = "ipython" },
+    { name = "pytest" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "editables", specifier = ">=0.5" },
     { name = "hatchling", specifier = ">=1.26.3" },
     { name = "hydra-core", specifier = ">=1.3.2" },
-    { name = "ipython", specifier = ">=8.29.0" },
     { name = "jaxtyping", specifier = ">=0.2.36" },
     { name = "matplotlib", specifier = ">=3.9.2" },
     { name = "numpy", specifier = ">=2.1.3" },
     { name = "pillow-simd", specifier = ">=9.5.0.post2" },
-    { name = "pytest", specifier = ">=8.3.3" },
     { name = "setuptools", specifier = ">=75.6.0" },
     { name = "tensorboard", specifier = ">=2.18.0" },
     { name = "timm", specifier = ">=1.0.11" },
     { name = "torch", specifier = ">=2.5.1" },
     { name = "triton", specifier = ">=3.1.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "hatchling", specifier = ">=1.26.3" },
+    { name = "ipython", specifier = ">=8.29.0" },
+    { name = "pytest", specifier = ">=8.3.3" },
 ]
 
 [[package]]
