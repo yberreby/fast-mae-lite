@@ -1,0 +1,17 @@
+defaults:
+  - config
+  - _self_
+
+# Overrides for sweep.
+total_samples: 110_000 # Quick eval for each trial
+samples_per_viz: 50_000
+samples_per_val: 50_000
+samples_per_ckpt: 100_000
+
+batch_size: 512
+
+hydra:
+  sweeper:
+    # Parameters to sweep over.
+    params:
+      lr: 1e-4,3e-4,1e-3

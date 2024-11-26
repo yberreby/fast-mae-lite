@@ -15,7 +15,7 @@ total_samples: 1_000_000 # ~400 epochs on ImageNette
 amp: true
 grad_clip: 1.0
 mask_ratio: 0.75
-lr: 1.5e-3
+lr: 3e-4
 seed: 42
 profiler: false
 
