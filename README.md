@@ -14,8 +14,13 @@ I needed it :)
 ## Test inference from pretrained
 
 ```
-uv run pytest  --verbose
+uv run pytest --verbose
 ```
+
+The image that will be saved *should* look odd, but have recognizable and meaningful shapes.
+The odd appearance is because the original pretrained MAE-Lite was trained to
+predict _locally-normalized patches_, and the loss was masked out of patches
+that are fed as input (since predicting them is trivial).
 
 ## Single training run
 
