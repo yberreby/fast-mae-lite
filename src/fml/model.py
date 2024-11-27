@@ -76,10 +76,9 @@ class MAELite(nn.Module):
         save_file(self.state_dict(), path.with_suffix(".safetensors"))
         json.dump(self.config.__dict__, open(path.with_suffix(".json"), "w"))
 
-    @classmethod
-    def load_legacy_weights(cls, path: str | Path) -> "MAELite":
+    def load_legacy_weights(self, path: str | Path, device: torch.device = 'cuda') -> "MAELite":
         """Load weights from original MAELite repo format, remapping keys to new structure."""
-        ckpt = torch.load(path, map_location="cuda", weights_only=True)
+        ckpt = torch.load(path, map_location=device, weights_only=True)
         state_dict = ckpt.get("model", ckpt)
 
         # Map legacy state dict keys to our new structure
@@ -105,6 +104,5 @@ class MAELite(nn.Module):
                 new_k = re.sub(pattern, replacement, new_k)
             new_state_dict[new_k] = v
 
-        model = cls(MAEConfig())
-        model.load_state_dict(new_state_dict)
-        return model.to("cuda")
+        self.load_state_dict(new_state_dict)
+        return self.to(device)

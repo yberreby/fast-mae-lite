@@ -15,7 +15,7 @@ def model():
 @pytest.fixture
 def pretrained_model(model):
     # Old: load_pretrained_weights(model, "ckpt/mae_tiny_400e.pth.tar")
-    return MAELite.load_legacy_weights("ckpt/mae_tiny_400e.pth.tar")
+    return model.load_legacy_weights("ckpt/mae_tiny_400e.pth.tar")
 
 
 @pytest.fixture
