@@ -1,40 +1,17 @@
 defaults:
-  - base_train_config # Reference the schema
+  - base_train_config
   - _self_
-
-# Model configuration
-patch_size: 16
-embed_dim: 192 # Tiny variant
-decoder_embed_dim: 96
-compile: true
 
 # Training parameters
 batch_size: 128
-total_samples: 100_000 # ~400 epochs on ImageNette
-amp: true
-grad_clip: 1.0
-mask_ratio: 0.75
+total_samples: 100_000
 lr: 3e-4
-lr_layer_decay: 1 # Layer-wise LR decay. Set to <1 to enable. This mechanism is not polished or well-tested yet.
-warmup_ratio: 0.1 # ratio of steps over which to warmup
+warmup_ratio: 0.1
 weight_decay: 0.01
 beta1: 0.9
 beta2: 0.999
-seed: 42
-profiler: false
-
-# Data configuration
-data:
-  root: /home/yberreby/datasets/imagenette # Will be overridden by CLI
-  train_val_split: 0.9
-  pin_memory: false
-  # num_workers: 16
 
 # Logging and checkpointing
-log_dir: runs
-ckpt_dir: checkpoints
-samples_per_viz: 100_000
-samples_per_val: 100_000
+samples_per_viz: 10_000
+samples_per_val: 10_000
 samples_per_ckpt: 100_000
-
-pretrained_path: "ckpt/mae_tiny_400e.pth.tar" # Optional
