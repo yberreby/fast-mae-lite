@@ -12,7 +12,6 @@ from .decoder import MAEDecoder
 from .config import MAEConfig
 
 
-
 class MAELite(nn.Module):
     """MAE model with ViT backbone."""
 

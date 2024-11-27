@@ -4,6 +4,7 @@ from torch import nn
 
 class Attention(nn.Module):
     """Drop-in replacement for custom Attention using PyTorch's MultiheadAttention."""
+
     def __init__(
         self,
         dim: int,
@@ -19,10 +20,12 @@ class Attention(nn.Module):
             num_heads=num_heads,
             dropout=attn_drop,
             bias=qkv_bias,
-            batch_first=True
+            batch_first=True,
         )
         self.proj_drop = nn.Dropout(proj_drop)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        out, _ = self.mha(x, x, x, need_weights=False)  # Changed from self.attn to self.mha
+        out, _ = self.mha(
+            x, x, x, need_weights=False
+        )  # Changed from self.attn to self.mha
         return self.proj_drop(out)
