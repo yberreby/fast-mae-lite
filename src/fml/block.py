@@ -4,6 +4,7 @@ from torch import nn
 from .attention import Attention
 from timm.models.vision_transformer import Mlp
 
+
 class Block(nn.Module):
     def __init__(
         self,

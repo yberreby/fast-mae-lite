@@ -87,9 +87,7 @@ def initialize_training(
 
     t0 = time.perf_counter()
     train_loader, val_loader = get_dataloaders(cfg)
-    logger.info(
-        f"Dataset sizes - Train: {len(train_loader)}, Val: {len(val_loader)}"
-    )
+    logger.info(f"Dataset sizes - Train: {len(train_loader)}, Val: {len(val_loader)}")
     logger.info(f"Dataloader setup: {time.perf_counter() - t0:.2f}s")
 
     writer = SummaryWriter(cfg.log_dir)

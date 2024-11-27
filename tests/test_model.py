@@ -5,10 +5,11 @@ from fml.utils import prepare_sample_input, denorm
 import torch
 from torch.amp.autocast_mode import autocast
 
+
 @pytest.fixture
 def model():
     config = MAEConfig()  # Uses default tiny configuration
-    model = MAELite(config, torch.device('cuda'))
+    model = MAELite(config, torch.device("cuda"))
     return model
 
 
@@ -35,7 +36,7 @@ def test_model_forward_pas(pretrained_model, sample_image):
 def test_visual_reconstruction(pretrained_model, sample_image):
     def reconstruct_image(model, image, use_amp=False):
         torch.manual_seed(0)
-        with autocast('cuda', enabled=use_amp):
+        with autocast("cuda", enabled=use_amp):
             with torch.no_grad():
                 _, pred, _, _ = model(image, mask_ratio=0.75)
             reconstructed = model.unpatchify(pred).cpu().squeeze(0)
