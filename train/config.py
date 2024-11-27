@@ -30,7 +30,9 @@ class BaseTrainConfig:
     seed: Optional[int] = None  # override for reproducibility
     profiler: bool = False
 
-    lr_layer_decay: float = 0.85  # Layer-wise LR decay
+    lr_layer_decay: float = (
+        1  # layerwise LR decay. qualitatively different behavior if <1
+    )
     warmup_ratio: float = 0.1
     weight_decay: float = 0.05
     beta1: float = 0.9
