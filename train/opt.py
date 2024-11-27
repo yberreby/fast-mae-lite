@@ -79,7 +79,13 @@ def create_optimizer_and_scheduler(
         )
     else:
         logger.info("Using global learning rate")
-        param_groups = model.parameters()
+        param_groups = [
+            {
+                "params": model.parameters(),
+                # DON'T FORGET TO SET THE LR HERE!
+                "lr": cfg.lr,
+            }
+        ]
 
     optimizer = torch.optim.AdamW(
         param_groups,
