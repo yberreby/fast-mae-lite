@@ -14,7 +14,6 @@ from torch.utils.tensorboard.writer import SummaryWriter
 from torch.utils.data import DataLoader
 
 from fml.model import MAEConfig, MAELite
-from fml.utils import load_pretrained_weights
 from train.config import BaseTrainConfig
 from train.data import get_dataloaders
 from train.training import MAETrainer  # Using our refactored trainer
@@ -56,7 +55,7 @@ def create_model(
     model = MAELite(model_cfg).to(device)
 
     if cfg.pretrained_path:
-        load_pretrained_weights(model, cfg.pretrained_path, device)
+        model.load_legacy_weights(cfg.pretrained_path, device)
 
     if cfg.compile:
         t1 = time.perf_counter()

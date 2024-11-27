@@ -5,8 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "editables>=0.5",
-    "hatchling>=1.26.3",
     "hydra-core>=1.3.2",
     "jaxtyping>=0.2.36",
     "matplotlib>=3.9.2",
@@ -29,4 +27,16 @@ testpaths = ["tests", "integration"]
 pythonpath = ["."]
 
 [dependency-groups]
-dev = ["hatchling>=1.26.3", "ipython>=8.29.0", "pytest>=8.3.3"]
+dev = [
+    "hatchling>=1.26.3",
+    "ipython>=8.29.0",
+    "matplotlib>=3.9.2",
+    "pytest>=8.3.3",
+    "setuptools>=75.6.0",
+]
+train = [
+    "hydra-core>=1.3.2",
+    "matplotlib>=3.9.2",
+    "tensorboard>=2.18.0",
+    "triton>=3.1.0",
+]

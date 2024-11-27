@@ -174,15 +174,6 @@ wheels = [
 ]
 
 [[package]]
-name = "editables"
-version = "0.5"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/37/4a/986d35164e2033ddfb44515168a281a7986e260d344cf369c3f52d4c3275/editables-0.5.tar.gz", hash = "sha256:309627d9b5c4adc0e668d8c6fa7bac1ba7c8c5d415c2d27f60f081f8e80d1de2", size = 14744 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6b/be/0f2f4a5e8adc114a02b63d92bf8edbfa24db6fc602fca83c885af2479e0e/editables-0.5-py3-none-any.whl", hash = "sha256:61e5ffa82629e0d8bfe09bc44a07db3c1ab8ed1ce78a6980732870f19b5e7d4c", size = 5098 },
-]
-
-[[package]]
 name = "executing"
 version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -205,8 +196,6 @@ name = "fml"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "editables" },
-    { name = "hatchling" },
     { name = "hydra-core" },
     { name = "jaxtyping" },
     { name = "matplotlib" },
@@ -223,13 +212,19 @@ dependencies = [
 dev = [
     { name = "hatchling" },
     { name = "ipython" },
+    { name = "matplotlib" },
     { name = "pytest" },
+    { name = "setuptools" },
+]
+train = [
+    { name = "hydra-core" },
+    { name = "matplotlib" },
+    { name = "tensorboard" },
+    { name = "triton" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "editables", specifier = ">=0.5" },
-    { name = "hatchling", specifier = ">=1.26.3" },
     { name = "hydra-core", specifier = ">=1.3.2" },
     { name = "jaxtyping", specifier = ">=0.2.36" },
     { name = "matplotlib", specifier = ">=3.9.2" },
@@ -246,7 +241,15 @@ requires-dist = [
 dev = [
     { name = "hatchling", specifier = ">=1.26.3" },
     { name = "ipython", specifier = ">=8.29.0" },
+    { name = "matplotlib", specifier = ">=3.9.2" },
     { name = "pytest", specifier = ">=8.3.3" },
+    { name = "setuptools", specifier = ">=75.6.0" },
+]
+train = [
+    { name = "hydra-core", specifier = ">=1.3.2" },
+    { name = "matplotlib", specifier = ">=3.9.2" },
+    { name = "tensorboard", specifier = ">=2.18.0" },
+    { name = "triton", specifier = ">=3.1.0" },
 ]
 
 [[package]]
@@ -1245,14 +1248,14 @@ wheels = [
 
 [[package]]
 name = "tqdm"
-version = "4.67.0"
+version = "4.67.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "platform_system == 'Windows'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e8/4f/0153c21dc5779a49a0598c445b1978126b1344bab9ee71e53e44877e14e0/tqdm-4.67.0.tar.gz", hash = "sha256:fe5a6f95e6fe0b9755e9469b77b9c3cf850048224ecaa8293d7d2d31f97d869a", size = 169739 }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/4b/29b4ef32e036bb34e4ab51796dd745cdba7ed47ad142a9f4a1eb8e0c744d/tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2", size = 169737 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2b/78/57043611a16c655c8350b4c01b8d6abfb38cc2acb475238b62c2146186d7/tqdm-4.67.0-py3-none-any.whl", hash = "sha256:0cd8af9d56911acab92182e88d763100d4788bdf421d251616040cc4d44863be", size = 78590 },
+    { url = "https://files.pythonhosted.org/packages/d0/30/dc54f88dd4a2b5dc8a0279bdd7270e735851848b762aeb1c1184ed1f6b14/tqdm-4.67.1-py3-none-any.whl", hash = "sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2", size = 78540 },
 ]
 
 [[package]]
