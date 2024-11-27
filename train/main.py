@@ -2,7 +2,7 @@ import logging
 import time
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, cast
 
 import hydra
 import numpy as np
@@ -25,7 +25,7 @@ cs.store(name="base_train_config", node=BaseTrainConfig)
 
 @dataclass
 class TrainingResources:
-    model: torch.nn.Module
+    model: MAELite
     optimizer: torch.optim.Optimizer
     train_loader: DataLoader
     val_loader: DataLoader
@@ -42,7 +42,7 @@ def setup_paths(cfg: BaseTrainConfig) -> None:
 
 def create_model(
     cfg: BaseTrainConfig, device: torch.device, logger: logging.Logger
-) -> torch.nn.Module:
+) -> MAELite:
     t0 = time.perf_counter()
 
     model_cfg = MAEConfig(
@@ -63,7 +63,7 @@ def create_model(
         logger.info(f"Compilation: {time.perf_counter() - t1:.2f}s")
 
     logger.info(f"Model creation: {time.perf_counter() - t0:.2f}s")
-    return model
+    return cast(MAELite, model)
 
 
 def setup_profiler(log_dir: str) -> torch.profiler.profile:
@@ -88,7 +88,7 @@ def initialize_training(
     t0 = time.perf_counter()
     train_loader, val_loader = get_dataloaders(cfg)
     logger.info(
-        f"Dataset sizes - Train: {len(train_loader.dataset)}, Val: {len(val_loader.dataset)}"
+        f"Dataset sizes - Train: {len(train_loader)}, Val: {len(val_loader)}"
     )
     logger.info(f"Dataloader setup: {time.perf_counter() - t0:.2f}s")
 

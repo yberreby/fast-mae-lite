@@ -16,7 +16,7 @@ def create_transforms(train: bool, size: int = 224) -> transforms.Compose:
                 transforms.RandomResizedCrop(size, antialias=True),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                transforms.Normalize(**IMAGENETTE_STATS),
+                transforms.Normalize(**IMAGENETTE_STATS, inplace=False),
             ]
         )
     else:
@@ -25,7 +25,7 @@ def create_transforms(train: bool, size: int = 224) -> transforms.Compose:
                 transforms.Resize(resize_size, antialias=True),
                 transforms.CenterCrop(size),
                 transforms.ToTensor(),
-                transforms.Normalize(**IMAGENETTE_STATS),
+                transforms.Normalize(**IMAGENETTE_STATS, inplace=False),
             ]
         )
 

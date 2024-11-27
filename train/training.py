@@ -6,8 +6,10 @@ from typing import Optional
 from dataclasses import dataclass
 
 import torch
-from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard.writer import SummaryWriter
+from torch.amp.grad_scaler import GradScaler
 from tqdm import tqdm
+from torch.amp.autocast_mode import autocast
 
 from fml.model import MAELite
 from fml.utils import denorm
@@ -16,9 +18,9 @@ from fml.utils import denorm
 @dataclass
 class StepOutput:
     loss: float
-    reconstructed: torch.Tensor
-    mask: torch.Tensor
-    latent: torch.Tensor
+    reconstructed: Optional[torch.Tensor]
+    mask: Optional[torch.Tensor]
+    latent: Optional[torch.Tensor]
 
 
 class MAETrainer:
@@ -47,7 +49,7 @@ class MAETrainer:
         self.max_vis_images = max_vis_images
 
         self.writer = SummaryWriter()
-        self.scaler = torch.amp.GradScaler(enabled=cfg.amp)
+        self.scaler = GradScaler(enabled=cfg.amp)
         self.imgs_seen = 0
         self.epoch = 0
         self.samples_since_val = 0
@@ -82,7 +84,7 @@ class MAETrainer:
         torch.manual_seed(0)  # Consistent masking for validation
         images = images.to(self.device, non_blocking=True)
 
-        with torch.amp.autocast("cuda", enabled=self.cfg.amp):
+        with autocast("cuda", enabled=self.cfg.amp):
             loss, pred, mask, latent = self.model(
                 images, mask_ratio=self.cfg.mask_ratio
             )
@@ -95,7 +97,7 @@ class MAETrainer:
     def training_step(self, images: torch.Tensor) -> StepOutput:
         images = images.to(self.device, non_blocking=True)
 
-        with torch.amp.autocast("cuda", enabled=self.cfg.amp):
+        with autocast("cuda", enabled=self.cfg.amp):
             loss, pred, mask, latent = self.model(
                 images, mask_ratio=self.cfg.mask_ratio
             )
@@ -120,6 +122,8 @@ class MAETrainer:
     def log_visuals(
         self, prefix: str, originals: torch.Tensor, out: StepOutput
     ) -> None:
+        assert out.reconstructed is not None
+        assert out.mask is not None
         # print("Logging visuals...", end='', flush=True)
         if self.max_vis_images:
             originals = originals[: self.max_vis_images]
