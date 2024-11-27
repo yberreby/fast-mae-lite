@@ -1,0 +1,38 @@
+defaults:
+  - base_schema # Add this line at the top
+  - _self_ # Keep existing defaults
+
+data:
+  root: ${oc.env:HOME}/datasets/imagenette
+  train_val_split: 0.9
+  num_workers: 4
+  pin_memory: false
+
+compile: true
+amp: true
+profiler: false
+
+patch_size: 16
+embed_dim: 192
+decoder_embed_dim: 96
+
+batch_size: 256
+total_samples: 1_000_000
+grad_clip: 1.0
+mask_ratio: 0.75
+
+lr: 1.5e-4
+lr_layer_decay: 1.0
+warmup_ratio: 0.1
+weight_decay: 0.05
+beta1: 0.9
+beta2: 0.999
+
+log_dir: runs
+ckpt_dir: checkpoints
+samples_per_viz: 1000
+samples_per_val: 10000
+samples_per_ckpt: 50000
+
+peak_performance_test: false
+seed: 42
