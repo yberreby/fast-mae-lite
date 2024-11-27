@@ -8,7 +8,16 @@ For now, this repository **only supports the tiny variant**, but supporting othe
 
 ## Why?
 
-I needed it :)
+I needed:
+
+- To run and fine-tune a pretrained MAE-Lite under modern Python and Torch versions,
+- To _recover color_. In the original pretrained models, there is information loss due to patch-local normalization.
+  The training code in this repository fine-tunes a pretrained model to recover
+  color (and also predict patches that are seen as input - a rather trivial
+  operation, but convenient for some applications). Few gradient descent steps
+  are needed to do so.
+
+This is released as-is, it is likely that there will be breakages, incompatibilities, etc. Please open an issue - or better yet, a pull request - if you encounter any.
 
 ## Test inference from pretrained
 
