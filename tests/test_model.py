@@ -8,7 +8,7 @@ import torch
 @pytest.fixture
 def model():
     config = MAEConfig()  # Uses default tiny configuration
-    model = MAELite(config).to("cuda")
+    model = MAELite(config, torch.device('cuda'))
     return model
 
 

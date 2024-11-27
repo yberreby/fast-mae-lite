@@ -52,10 +52,10 @@ def create_model(
         norm_pix_loss=False,
         masked_loss=False,
     )
-    model = MAELite(model_cfg).to(device)
+    model = MAELite(model_cfg, device)
 
     if cfg.pretrained_path:
-        model.load_legacy_weights(cfg.pretrained_path, device)
+        model.load_legacy_weights(cfg.pretrained_path)
 
     if cfg.compile:
         t1 = time.perf_counter()

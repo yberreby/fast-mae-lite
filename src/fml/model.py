@@ -14,8 +14,9 @@ from .config import MAEConfig
 class MAELite(nn.Module):
     """MAE model with ViT backbone."""
 
-    def __init__(self, config: MAEConfig):
+    def __init__(self, config: MAEConfig, device: torch.device):
         super().__init__()
+        self.device = device
         self.config = config
         self.encoder = MAEEncoder(config)
         self.decoder = MAEDecoder(config)
@@ -76,9 +77,9 @@ class MAELite(nn.Module):
         save_file(self.state_dict(), path.with_suffix(".safetensors"))
         json.dump(self.config.__dict__, open(path.with_suffix(".json"), "w"))
 
-    def load_legacy_weights(self, path: str | Path, device: torch.device = 'cuda') -> "MAELite":
+    def load_legacy_weights(self, path: str | Path) -> "MAELite":
         """Load weights from original MAELite repo format, remapping keys to new structure."""
-        ckpt = torch.load(path, map_location=device, weights_only=True)
+        ckpt = torch.load(path, map_location=self.device, weights_only=True)
         state_dict = ckpt.get("model", ckpt)
 
         # Map legacy state dict keys to our new structure
@@ -105,4 +106,4 @@ class MAELite(nn.Module):
             new_state_dict[new_k] = v
 
         self.load_state_dict(new_state_dict)
-        return self.to(device)
+        return self.to(self.device)
