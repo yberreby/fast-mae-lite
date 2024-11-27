@@ -5,10 +5,12 @@ from typing import Optional, Tuple
 
 import torch
 import torch.nn as nn
-import re
+
+from .legacy_weights import remap_legacy_state_dict_to_new_format
 from .encoder import MAEEncoder
 from .decoder import MAEDecoder
 from .config import MAEConfig
+
 
 
 class MAELite(nn.Module):
@@ -78,32 +80,11 @@ class MAELite(nn.Module):
         json.dump(self.config.__dict__, open(path.with_suffix(".json"), "w"))
 
     def load_legacy_weights(self, path: str | Path) -> "MAELite":
-        """Load weights from original MAELite repo format, remapping keys to new structure."""
+        """Load weights from original MAELite repo format."""
         ckpt = torch.load(path, map_location=self.device, weights_only=True)
         state_dict = ckpt.get("model", ckpt)
 
-        # Map legacy state dict keys to our new structure
-        key_transforms = {
-            r"^patch_embed": "encoder.patch_embed",
-            r"^cls_token": "encoder.cls_token",
-            r"^pos_embed": "encoder.pos_embed",
-            r"^blocks\.": "encoder.blocks.",
-            r"^norm\.": "encoder.norm.",
-            r"^decoder_embed\.": "decoder.decoder_embed.",
-            r"^decoder_pos_embed": "decoder.decoder_pos_embed",
-            r"^decoder_blocks\.": "decoder.decoder_blocks.",
-            r"^decoder_norm\.": "decoder.decoder_norm.",
-            r"^decoder_pred\.": "decoder.decoder_pred.",
-            r"^mask_token": "decoder.mask_token",
-        }
+        state_dict = remap_legacy_state_dict_to_new_format(state_dict)
 
-        new_state_dict = {}
-        for k, v in state_dict.items():
-            new_k = k.replace("module.model.", "")  # Remove legacy prefix
-            # Apply our transforms
-            for pattern, replacement in key_transforms.items():
-                new_k = re.sub(pattern, replacement, new_k)
-            new_state_dict[new_k] = v
-
-        self.load_state_dict(new_state_dict)
+        self.load_state_dict(state_dict)
         return self.to(self.device)
