@@ -3,13 +3,16 @@ defaults:
   - _self_
 
 # Training parameters
-batch_size: 128
+batch_size: 512
 total_samples: 100_000
-lr: 3e-4
+grad_clip: 1.0
+mask_ratio: 0.75
+lr: 1.2e-3
+lr_layer_decay: 0.85 # Layer-wise LR decay
 warmup_ratio: 0.1
 weight_decay: 0.01
-beta1: 0.9
-beta2: 0.999
+beta1: 0.85
+beta2: 0.995
 
 # Logging and checkpointing
 samples_per_viz: 10_000

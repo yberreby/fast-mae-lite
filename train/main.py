@@ -17,6 +17,7 @@ from fml.model import MAEConfig, MAELite
 from train.config import BaseTrainConfig
 from train.data import get_dataloaders
 from train.training import MAETrainer  # Using our refactored trainer
+from train.opt import create_optimizer_and_scheduler
 
 torch.set_float32_matmul_precision("high")
 cs = ConfigStore.instance()
@@ -26,7 +27,6 @@ cs.store(name="base_train_config", node=BaseTrainConfig)
 @dataclass
 class TrainingResources:
     model: MAELite
-    optimizer: torch.optim.Optimizer
     train_loader: DataLoader
     val_loader: DataLoader
     writer: SummaryWriter
@@ -83,11 +83,12 @@ def initialize_training(
     logger: logging.Logger,
 ) -> TrainingResources:
     model = create_model(cfg, device, logger)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr)
 
     t0 = time.perf_counter()
     train_loader, val_loader = get_dataloaders(cfg)
-    logger.info(f"Dataset sizes - Train: {len(train_loader)}, Val: {len(val_loader)}")
+    logger.info(
+        f"Dataset sizes (in batches) - Train: {len(train_loader)}, Val: {len(val_loader)}"
+    )
     logger.info(f"Dataloader setup: {time.perf_counter() - t0:.2f}s")
 
     writer = SummaryWriter(cfg.log_dir)
@@ -95,7 +96,6 @@ def initialize_training(
 
     return TrainingResources(
         model=model,
-        optimizer=optimizer,
         train_loader=train_loader,
         val_loader=val_loader,
         writer=writer,
@@ -124,11 +124,23 @@ def main(cfg: BaseTrainConfig) -> None:
     if resources.profiler:
         resources.profiler.start()
 
+    # Create optimizer and scheduler
+    total_steps = cfg.total_samples // cfg.batch_size
+    warmup_steps = int(total_steps * cfg.warmup_ratio)
+    logger.info(
+        f"Preparing to train for {total_steps} steps, warming up over {warmup_steps}"
+    )
+    optimizer, scheduler = create_optimizer_and_scheduler(
+        logger, resources.model, cfg, total_steps
+    )
+
+    # Pass scheduler to trainer
     trainer = MAETrainer(
         model=resources.model,
         train_loader=resources.train_loader,
         val_loader=resources.val_loader,
-        optimizer=resources.optimizer,
+        optimizer=optimizer,
+        scheduler=scheduler,  # Add this
         cfg=cfg,
         device=device,
         logger=logger,

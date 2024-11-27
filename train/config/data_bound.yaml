@@ -1,0 +1,20 @@
+defaults:
+  - base_train_config # Reference the schema
+  - _self_
+
+# Training parameters
+batch_size: 8
+total_samples: 50_000 # don't need that many to recover color
+grad_clip: 1.0
+mask_ratio: 0.75
+lr: 1.9e-5
+lr_layer_decay: 1
+warmup_ratio: 0.1
+weight_decay: 0.01
+beta1: 0.9
+beta2: 0.999
+
+# Logging and checkpointing
+samples_per_viz: 1_000
+samples_per_val: 1_000
+samples_per_ckpt: 100_000

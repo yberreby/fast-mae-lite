@@ -1,16 +1,15 @@
 from dataclasses import dataclass, field
 import multiprocessing as mp
 from typing import Optional
-
-from omegaconf import MISSING
+from pathlib import Path
 
 
 @dataclass
 class DataConfig:
-    root: str = MISSING
+    root: str = str(Path.home() / "datasets/imagenette")
     train_val_split: float = 0.9
     num_workers: int = field(default_factory=lambda: min(mp.cpu_count(), 16))
-    pin_memory: bool = True
+    pin_memory: bool = False
 
 
 @dataclass
@@ -23,13 +22,19 @@ class BaseTrainConfig:
 
     # Training
     batch_size: int = 256
-    total_samples: int = 1_000_000  # ~400 epochs on ImageNette
+    total_samples: int = 1_000_000
     amp: bool = True
     grad_clip: float = 1.0
     mask_ratio: float = 0.75
     lr: float = 1.5e-4
-    seed: Optional[int] = None
+    seed: Optional[int] = None  # override for reproducibility
     profiler: bool = False
+
+    lr_layer_decay: float = 0.85  # Layer-wise LR decay
+    warmup_ratio: float = 0.1
+    weight_decay: float = 0.05
+    beta1: float = 0.9
+    beta2: float = 0.999
 
     # Data
     data: DataConfig = field(default_factory=DataConfig)
@@ -38,10 +43,11 @@ class BaseTrainConfig:
     log_dir: str = "runs"
     ckpt_dir: str = "checkpoints"
     samples_per_viz: int = 1000
-    samples_per_val: int = 10000  # ~4 epochs on ImageNette
-    samples_per_ckpt: int = 50000  # ~20 epochs
+    samples_per_val: int = 10000
+    samples_per_ckpt: int = 50000
 
-    pretrained_path: Optional[str] = None
+    # From original MAE-Lite repo.
+    pretrained_path: Optional[str] = "ckpt/mae_tiny_400e.pth.tar"
 
     def __post_init__(self):
         assert self.samples_per_ckpt >= self.samples_per_val >= self.samples_per_viz

@@ -61,22 +61,27 @@ class MAETrainer:
         return self.imgs_seen // self.cfg.batch_size
 
     def save_checkpoint(self, path: Path) -> None:
-        self.logger.info(f"Saving checkpoint to {path}")
-        path.parent.mkdir(parents=True, exist_ok=True)
-
         ckpt = {
             "imgs_seen": self.imgs_seen,
             "epoch": self.epoch,
             "model": self.model.state_dict(),
             "optimizer": self.optimizer.state_dict(),
+            "scheduler": self.scheduler.state_dict() if self.scheduler else None,
             "scaler": self.scaler.state_dict(),
         }
-        if self.scheduler:
-            ckpt["scheduler"] = self.scheduler.state_dict()
-
         tmp_path = path.with_suffix(".tmp")
         torch.save(ckpt, tmp_path)
         tmp_path.rename(path)
+
+    def load_checkpoint(self, path: Path) -> None:
+        ckpt = torch.load(path)
+        self.imgs_seen = ckpt["imgs_seen"]
+        self.epoch = ckpt["epoch"]
+        self.model.load_state_dict(ckpt["model"])
+        self.optimizer.load_state_dict(ckpt["optimizer"])
+        if self.scheduler and "scheduler" in ckpt:
+            self.scheduler.load_state_dict(ckpt["scheduler"])
+        self.scaler.load_state_dict(ckpt["scaler"])
 
     @torch.no_grad()
     def validation_step(self, images: torch.Tensor) -> StepOutput:
@@ -111,9 +116,9 @@ class MAETrainer:
 
         self.scaler.step(self.optimizer)
         self.scaler.update()
+        if self.scheduler:
+            self.scheduler.step()  # Step scheduler after optimizer
         self.optimizer.zero_grad(set_to_none=True)
-        if self.profiler:
-            self.profiler.step()
 
         return StepOutput(
             loss=loss.item(), reconstructed=reconstructed, mask=mask, latent=latent
@@ -156,8 +161,12 @@ class MAETrainer:
         metrics = {
             f"{prefix}/loss": out.loss,
             f"{prefix}/epoch": self.epoch,
-            f"{prefix}/lr": self.optimizer.param_groups[0]["lr"],
         }
+
+        # Log learning rates for each parameter group
+        for i, group in enumerate(self.optimizer.param_groups):
+            metrics[f"{prefix}/lr_group_{i}"] = group["lr"]
+
         if prefix == "train":
             metrics["train/memory_gb"] = torch.cuda.memory_allocated() / 1e9
 
