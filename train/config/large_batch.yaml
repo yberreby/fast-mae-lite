@@ -1,5 +1,5 @@
 defaults:
-  - base_train_config
+  - base
   - _self_
 
 # Training parameters
