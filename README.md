@@ -19,6 +19,10 @@ I needed:
 
 This is released as-is, it is likely that there will be breakages, incompatibilities, etc. Please open an issue - or better yet, a pull request - if you encounter any.
 
+## Prerequisites
+
+Download the original [MAE-Tiny checkpoint](https://drive.google.com/file/d/1ZQYlvCPLZrJDqn2lp4GCIVL246WPqgEf/view?usp=sharing) to `ckpt/mae_tiny_400e.pth.tar`.
+
 ## Test inference from pretrained
 
 ```
