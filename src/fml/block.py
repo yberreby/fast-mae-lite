@@ -2,7 +2,7 @@ from typing import Callable
 import torch
 from torch import nn
 from .attention import Attention
-from .mlp import Mlp
+from timm.models.vision_transformer import Mlp
 
 class Block(nn.Module):
     def __init__(
