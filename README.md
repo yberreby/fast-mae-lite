@@ -21,7 +21,9 @@ This is released as-is, it is likely that there will be breakages, incompatibili
 
 ## Prerequisites
 
-Download the original [MAE-Tiny checkpoint](https://drive.google.com/file/d/1ZQYlvCPLZrJDqn2lp4GCIVL246WPqgEf/view?usp=sharing) to `ckpt/mae_tiny_400e.pth.tar`.
+- Ensure you have [`uv`](https://docs.astral.sh/uv/) installed.
+- For inference/fine-tuning from pretrained: download the original [MAE-Tiny checkpoint](https://drive.google.com/file/d/1ZQYlvCPLZrJDqn2lp4GCIVL246WPqgEf/view?usp=sharing) to `ckpt/mae_tiny_400e.pth.tar`.
+- To try out fine-tuning on color recovery: download `imagenette` to `~/datasets/imagenette` (or elsewhere, in which case, override the corresponding path in the config).
 
 ## Test inference from pretrained
 
