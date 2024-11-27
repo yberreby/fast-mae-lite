@@ -8,7 +8,7 @@ from pathlib import Path
 class DataConfig:
     root: str = str(Path.home() / "datasets/imagenette")
     train_val_split: float = 0.9
-    num_workers: int = field(default_factory=lambda: min(mp.cpu_count(), 16))
+    num_workers: int = field(default_factory=lambda: min(mp.cpu_count(), 4))
     pin_memory: bool = False
 
 
