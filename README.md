@@ -19,6 +19,14 @@ I needed:
 
 This is released as-is, it is likely that there will be breakages, incompatibilities, etc. Please open an issue - or better yet, a pull request - if you encounter any.
 
+## Is it fast?
+
+Not terrible, not insanely fast yet.
+
+Current peak speed on a laptop with 16GB RAM, RTX 4060M (8GB VRAM), and a Ryzen 9 8945H CPU is about 2k img/s, seems to be be bottlenecked by data loading / preprocessing.
+
+Will see how fast we can get this to train on ImageNet on a single GPU.
+
 ## Prerequisites
 
 - Ensure you have [`uv`](https://docs.astral.sh/uv/) installed.
