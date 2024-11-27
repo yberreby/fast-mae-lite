@@ -31,6 +31,12 @@ class BaseTrainConfig:
     seed: Optional[int] = None
     profiler: bool = False
 
+    lr_layer_decay: float = 0.85  # Layer-wise LR decay
+    warmup_ratio: float = 0.1  # 10% of steps for warmup
+    weight_decay: float = 0.05  # From MAE paper
+    beta1: float = 0.9
+    beta2: float = 0.999
+
     # Data
     data: DataConfig = field(default_factory=DataConfig)
 

@@ -10,14 +10,13 @@ For now, this repository **only supports the tiny variant**, but supporting othe
 
 I needed it :)
 
-
 ## Test inference from pretrained
 
 ```
 uv run pytest --verbose
 ```
 
-The image that will be saved *should* look odd, but have recognizable and meaningful shapes.
+The image that will be saved _should_ look odd, but have recognizable and meaningful shapes.
 The odd appearance is because the original pretrained MAE-Lite was trained to
 predict _locally-normalized patches_, and the loss was masked out of patches
 that are fed as input (since predicting them is trivial).
@@ -27,6 +26,13 @@ that are fed as input (since predicting them is trivial).
 ```
 uv run -m train.main
 ```
+
+Recommendations:
+
+- Set `compile=false` for quick iteration.
+- Be mindful of available system RAM when setting workers.
+- Likely to be CPU- or disk-bound, not GPU-bound.
+- You probably don't _need_ warmup for this task.
 
 ## Hyperparameter sweep
 

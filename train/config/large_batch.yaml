@@ -9,17 +9,18 @@ decoder_embed_dim: 96
 compile: true
 
 # Training parameters
-batch_size: 128
+batch_size: 512
+# batch_size: 8
 total_samples: 100_000 # ~400 epochs on ImageNette
 amp: true
 grad_clip: 1.0
 mask_ratio: 0.75
-lr: 3e-4
-lr_layer_decay: 1 # Layer-wise LR decay. Set to <1 to enable. This mechanism is not polished or well-tested yet.
+lr: 1.2e-3 # linear scaling from 3e-4 bs128
+lr_layer_decay: 0.85 # Layer-wise LR decay
 warmup_ratio: 0.1 # ratio of steps over which to warmup
 weight_decay: 0.01
-beta1: 0.9
-beta2: 0.999
+beta1: 0.85
+beta2: 0.995
 seed: 42
 profiler: false
 
