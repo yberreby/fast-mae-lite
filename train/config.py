@@ -22,11 +22,6 @@ class TrainingConfig:
     amp: bool = True
     profiler: bool = False
 
-    # Model architecture
-    patch_size: int = 16
-    embed_dim: int = 192  # Tiny variant
-    decoder_embed_dim: int = 96
-
     # Training parameters
     batch_size: int = 256
     total_samples: int = 1_000_000

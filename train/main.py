@@ -51,10 +51,7 @@ def create_model(cfg: TrainingConfig, device: torch.device) -> MAELite:
     """Create and configure the model."""
     t0 = time.perf_counter()
 
-    model_cfg = MAEConfig(
-        patch_size=cfg.patch_size,
-        embed_dim=cfg.embed_dim,
-        decoder_embed_dim=cfg.decoder_embed_dim,
+    model_cfg = MAEConfig.tiny(
         norm_pix_loss=False,
         masked_loss=False,
     )
