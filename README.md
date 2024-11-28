@@ -4,7 +4,7 @@ A lightweight MAE-Lite port/implementation, **compatible with Python 3.11 and to
 
 Written for my own use; released in case it's useful to others.
 
-For now, this repository **only supports the tiny variant**, but supporting others should be straightforward. I just haven't needed them so far.
+For now, this repository **has only been tested with the tiny variant**, but handling others should be very straightforward.
 
 ## Why?
 
