@@ -16,3 +16,7 @@ runs
 outputs
 checkpoints
 multirun
+
+.ipynb_checkpoints
+*.ckpt
+*.pt
