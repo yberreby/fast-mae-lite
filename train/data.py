@@ -1,12 +1,14 @@
-from typing import Tuple
 import torch
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
+import logging
+
+logger = logging.getLogger(__name__)
 
 IMAGENETTE_STATS = {"mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]}
 
 
-def create_transforms(train: bool, size: int = 224) -> transforms.Compose:
+def create_transform(train: bool, size: int = 224) -> transforms.Compose:
     """Create transform pipeline with efficient resize."""
     resize_size = int(size * 1.143)  # Slightly larger for random crops
 
@@ -30,51 +32,89 @@ def create_transforms(train: bool, size: int = 224) -> transforms.Compose:
         )
 
 
-def get_dataloaders(cfg) -> Tuple[DataLoader, DataLoader]:
-    """Get dataloaders with optimized settings."""
-    # Create transforms
-    train_transform = create_transforms(True, cfg.patch_size * 14)  # 16 * 14 = 224
-    val_transform = create_transforms(False, cfg.patch_size * 14)
+class TensorCycler:
+    """Provides DataLoader-like iteration over a fixed tensor."""
 
-    # Load dataset
-    full_dataset = datasets.ImageFolder(root=cfg.data.root, transform=train_transform)
-    val_dataset = datasets.ImageFolder(root=cfg.data.root, transform=val_transform)
+    def __init__(self, images: torch.Tensor, batch_size: int, device: str = "cuda"):
+        self.images = images
+        self.batch_size = batch_size
+        self.device = device
+        self.length = len(images)
+        assert (
+            self.batch_size <= self.length
+        ), f"Batch size ({batch_size}) cannot be larger than dataset size ({self.length})"
 
-    # Split datasets
-    train_size = int(len(full_dataset) * cfg.data.train_val_split)
-    val_size = len(full_dataset) - train_size
+    def __iter__(self):
+        while True:  # Infinite iteration
+            idx = torch.randperm(self.length, device=self.device)[: self.batch_size]
+            yield self.images[idx], torch.zeros(self.batch_size, device=self.device)
 
-    if cfg.seed is not None:
-        generator = torch.Generator().manual_seed(cfg.seed)
-    else:
-        generator = None
+    def __len__(self):
+        return self.length // self.batch_size
 
-    train_dataset, _ = random_split(
-        full_dataset, [train_size, val_size], generator=generator
-    )
-    _, val_dataset = random_split(
-        val_dataset, [train_size, val_size], generator=generator
-    )
 
-    # Create dataloaders with optimized settings
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=cfg.batch_size,
-        shuffle=True,
-        num_workers=cfg.data.num_workers,
-        pin_memory=cfg.data.pin_memory,
-        persistent_workers=True if cfg.data.num_workers > 0 else False,
-        prefetch_factor=2 if cfg.data.num_workers > 0 else None,
-    )
-
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=cfg.batch_size,
+def get_preprocessed_tensors(dataset, indices, device="cuda") -> torch.Tensor:
+    """Process specific indices through dataset and store results."""
+    loader = DataLoader(
+        Subset(dataset, indices),
+        batch_size=len(indices),  # Process all at once
+        num_workers=1,
         shuffle=False,
-        num_workers=cfg.data.num_workers,
-        pin_memory=cfg.data.pin_memory,
-        persistent_workers=True if cfg.data.num_workers > 0 else False,
-        prefetch_factor=2 if cfg.data.num_workers > 0 else None,
+    )
+    # Single batch processing
+    images, _ = next(iter(loader))
+    return images.to(device)
+
+
+def get_dataloaders(cfg):
+    """Get either normal dataloaders or tensor cyclers."""
+    if cfg.data.tiny_dataset_size is None:
+        # Normal training path
+        train_transform = create_transform(True, cfg.patch_size * 14)
+        val_transform = create_transform(False, cfg.patch_size * 14)
+
+        train_dataset = datasets.ImageFolder(cfg.data.root, transform=train_transform)
+        val_dataset = datasets.ImageFolder(cfg.data.root, transform=val_transform)
+
+        logger.info(
+            f"Creating regular dataloaders with {len(train_dataset)} total images"
+        )
+
+        return map(
+            lambda ds: DataLoader(
+                ds,
+                batch_size=cfg.batch_size,
+                shuffle=True,
+                num_workers=cfg.data.num_workers,
+                pin_memory=cfg.data.pin_memory,
+                persistent_workers=cfg.data.num_workers > 0,
+                prefetch_factor=2 if cfg.data.num_workers > 0 else None,
+            ),
+            (train_dataset, val_dataset),
+        )
+
+    # Tiny dataset path
+    N = cfg.data.tiny_dataset_size
+    logger.info(f"Creating tiny dataset with {N} images each for train/val")
+
+    # Create transforms and base datasets
+    transforms_list = [
+        create_transform(is_train, cfg.patch_size * 14) for is_train in (True, False)
+    ]
+
+    datasets_list = list(
+        map(lambda t: datasets.ImageFolder(cfg.data.root, transform=t), transforms_list)
     )
 
-    return train_loader, val_loader
+    # Get separate indices for train and val
+    all_indices = torch.randperm(len(datasets_list[0]))
+    indices_list = [all_indices[:N].tolist(), all_indices[N : 2 * N].tolist()]
+
+    # Process images and create cyclers
+    return map(
+        lambda ds, idx: TensorCycler(
+            get_preprocessed_tensors(ds, idx, cfg.device), cfg.batch_size, cfg.device
+        ),
+        datasets_list,
+        indices_list,
+    )

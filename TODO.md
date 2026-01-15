@@ -1,0 +1,3 @@
+- test the training: model should be able to reach a certain loss on known data, with fixed seed
+- test the ckpt loading in CI, it's cheap. do it on CPU if possible
+- enforce ruff/pyright compliance on main branch?

@@ -8,7 +8,7 @@ from torch.amp.autocast_mode import autocast
 
 @pytest.fixture
 def model():
-    config = MAEConfig()  # Uses default tiny configuration
+    config = MAEConfig.tiny()
     model = MAELite(config, torch.device("cuda"))
     return model
 
