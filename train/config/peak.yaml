@@ -1,0 +1,16 @@
+defaults:
+  - base
+  - _self_
+
+peak_performance_test: true
+batch_size: 512 # Larger batch for throughput
+total_samples: 100_000 # Shorter run for perf testing
+profiler: true # Enable profiling
+
+# Disable overhead
+samples_per_viz: 999999999
+samples_per_val: 999999999
+samples_per_ckpt: 999999999
+
+compile: true
+amp: true

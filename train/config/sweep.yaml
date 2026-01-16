@@ -1,5 +1,5 @@
 defaults:
-  - config
+  - base
   - _self_
 
 # Overrides for sweep.

@@ -1,11 +1,17 @@
 defaults:
-  - base_train_config
+  - base
   - _self_
 
 # Training parameters
 batch_size: 128
-total_samples: 100_000
-lr: 3e-4
+data:
+  tiny_dataset_size: 256
+
+total_samples: 100_000 # don't need that many to recover color
+grad_clip: 1.0
+mask_ratio: 0.75
+lr: 1e-4
+lr_layer_decay: 1
 warmup_ratio: 0.1
 weight_decay: 0.01
 beta1: 0.9

@@ -1,0 +1,23 @@
+defaults:
+  - base
+  - _self_
+
+# Training parameters
+batch_size: 4
+data:
+  tiny_dataset_size: 4
+
+total_samples: 2000
+grad_clip: 0.5
+mask_ratio: 0.75
+lr: 8e-5
+lr_layer_decay: 1
+warmup_ratio: 0.5
+weight_decay: 1e-4
+beta1: 0.95
+beta2: 0.9995
+
+# Logging and checkpointing
+samples_per_viz: 100
+samples_per_val: 100
+samples_per_ckpt: 100_000
